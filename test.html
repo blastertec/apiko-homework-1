@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Just a test page</title>
+	<style>
+		body {
+			background-color: rgb(242, 242, 242);
+			font-family: Arial;
+		}
+		.post {
+			background-color: rgb(255, 255, 255);
+			margin: auto;
+			margin-top: 10px;
+			padding: 10px;
+			width: 900px;
+			height: auto;
+			box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px 0px;			
+		}
+		.post p {
+			padding-left: 40px;
+		}
+	</style>
+</head>
+<body>
+	
+	<script type="text/javascript">
+
+  		const postIdValue = findQueryParamValue('postid');
+		if (postIdValue) {
+  			fetchPostAndComments(postIdValue);
+	  	} else {
+	  		fetchPosts();
+	  	}
+
+	  	async function fetchPostAndComments(postId) {
+	  		await fetchPosts(postIdValue);
+  			await fetchComments(postIdValue);
+	  	}
+
+  		function createAndAppendPost(item) {
+  			const newPost = document.createElement('div');
+  			newPost.setAttribute('class', 'post');
+			newPost.setAttribute('id', `post${item.id}`);
+			document.body.appendChild(newPost);
+			newPost.innerHTML = `<h2><a href='?postid=${item.id}'>Post ${item.id}. ${item.title} </a></h2>
+				<p>${item.body}</p>`;
+  		}
+
+		function handleServerPostResponse(data) {
+			if (!data) {
+				console.log('Data is empty');
+				return;
+			}
+			if (Array.isArray(data)) {
+				data.forEach(item => createAndAppendPost(item));
+			} else if (typeof data === 'object' && Object.keys(data).length !== 0) {
+				createAndAppendPost(data);
+			} else {
+				console.log('Incorrect data type');
+			}
+  	 	}
+
+  	 	function handleServerCommentsResponse(postId, data) {
+  	 		if (!data) {
+				console.log('Data is empty');
+				return;
+			}
+
+  	 		if (data.length !== 0) {
+  	 			const post = document.getElementById(`post${postId}`);
+  	 			const commentsTitle = document.createElement('div');
+  	 			post.appendChild(commentsTitle);
+  	 			commentsTitle.innerHTML = '<h3>Comments:</h3>';
+  	 			data.forEach(item => appendCommentToPost(item, post)); 	
+  	 		} 
+  	 		
+  	 	}
+  	 	
+  	 	function appendCommentToPost(item, post) {
+  	 		const newComment = document.createElement('p');
+  	 		post.appendChild(newComment);
+  	 		newComment.innerHTML = `<h4>${item.name}, ${item.email}</h4><p>${item.body}</p>`;
+  	 	}
+
+  	 	function fetchComments(postId) {
+  	 		const url = `https://jsonplaceholder.typicode.com/posts/${postId}/comments`
+			return fetch(url)
+	  			.then(response => response.json())
+	  			.then(data => handleServerCommentsResponse(postId, data))
+	  			.catch(error => console.error(error));
+  	 	}
+
+  		function fetchPosts(id) {
+			const url = `https://jsonplaceholder.typicode.com/posts${id ? '/' + id : ''}`
+			return fetch(url)
+	  			.then(response => response.json())
+	  			.then(data => handleServerPostResponse(data))
+	  			.catch(error => console.error(error));
+  		}
+  		
+  		function findQueryParamValue(paramName) {
+  			let query = window.location.search;
+  			if (!query || !paramName) {
+  				return null;
+  			}
+  			query = query.slice(1); 
+  			const queryParams = query.split('&');
+
+  			const searchedParam = queryParams.find(item => {
+  				return item.split('=')[0] === paramName;
+  			});
+  			if (searchedParam) {
+  				return searchedParam.split('=')[1]; 
+  			}
+  			return null;
+  		}
+
+	</script>
+		
+
+</body>
+</html>
