@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Just a test page</title>
+	<title>Apiko Task 1</title>
 	<style>
 		body {
 			background-color: rgb(242, 242, 242);
@@ -20,22 +20,28 @@
 		.post p {
 			padding-left: 40px;
 		}
+		.comments {
+			padding-left: 50px;
+		}
 	</style>
 </head>
 <body>
 	
 	<script type="text/javascript">
-
-  		const postIdValue = findQueryParamValue('postid');
-		if (postIdValue) {
-  			fetchPostAndComments(postIdValue);
-	  	} else {
-	  		fetchPosts();
-	  	}
+		const userIdValue = findQueryParamValue('userid');
+		const postIdValue = findQueryParamValue('postid');
+		if (!userIdValue && !postIdValue) {
+			fetchPosts();
+		} else if (postIdValue) {
+			fetchPostAndComments(postIdValue);
+		} else if (userIdValue) {
+			fetchUserPosts(userIdValue);
+		}
 
 	  	async function fetchPostAndComments(postId) {
 	  		await fetchPosts(postIdValue);
   			await fetchComments(postIdValue);
+			//await fetchUserPosts(userIdValue);
 	  	}
 
   		function createAndAppendPost(item) {
@@ -44,12 +50,13 @@
 			newPost.setAttribute('id', `post${item.id}`);
 			document.body.appendChild(newPost);
 			newPost.innerHTML = `<h2><a href='?postid=${item.id}'>Post ${item.id}. ${item.title} </a></h2>
-				<p>${item.body}</p>`;
+				<p class='posted-by'>Posted by <a href='?userid=${item.userId}'>User ${item.userId}</a></p>
+				<p class='post-body'>${item.body}</p>`;
   		}
 
 		function handleServerPostResponse(data) {
 			if (!data) {
-				console.log('Data is empty');
+				console.log('No data fetched');
 				return;
 			}
 			if (Array.isArray(data)) {
@@ -63,7 +70,7 @@
 
   	 	function handleServerCommentsResponse(postId, data) {
   	 		if (!data) {
-				console.log('Data is empty');
+				console.log('No data fetched');
 				return;
 			}
 
@@ -71,7 +78,7 @@
   	 			const post = document.getElementById(`post${postId}`);
   	 			const commentsTitle = document.createElement('div');
   	 			post.appendChild(commentsTitle);
-  	 			commentsTitle.innerHTML = '<h3>Comments:</h3>';
+  	 			commentsTitle.innerHTML = '<h4 class=\'comments\'>Comments:</h4>';
   	 			data.forEach(item => appendCommentToPost(item, post)); 	
   	 		} 
   	 		
@@ -80,11 +87,11 @@
   	 	function appendCommentToPost(item, post) {
   	 		const newComment = document.createElement('p');
   	 		post.appendChild(newComment);
-  	 		newComment.innerHTML = `<h4>${item.name}, ${item.email}</h4><p>${item.body}</p>`;
+  	 		newComment.innerHTML = `<div class='comments'><h4>${item.name}, ${item.email}</h4>${item.body}</div>`;
   	 	}
 
   	 	function fetchComments(postId) {
-  	 		const url = `https://jsonplaceholder.typicode.com/posts/${postId}/comments`
+  	 		const url = `https://jsonplaceholder.typicode.com/posts/${postId}/comments`;
 			return fetch(url)
 	  			.then(response => response.json())
 	  			.then(data => handleServerCommentsResponse(postId, data))
@@ -92,7 +99,15 @@
   	 	}
 
   		function fetchPosts(id) {
-			const url = `https://jsonplaceholder.typicode.com/posts${id ? '/' + id : ''}`
+			const url = `https://jsonplaceholder.typicode.com/posts${id ? '/' + id : ''}`;
+			return fetch(url)
+	  			.then(response => response.json())
+	  			.then(data => handleServerPostResponse(data))
+	  			.catch(error => console.error(error));
+  		}
+
+		function fetchUserPosts(id) {
+			const url = `https://jsonplaceholder.typicode.com/posts?userId=${id}`;
 			return fetch(url)
 	  			.then(response => response.json())
 	  			.then(data => handleServerPostResponse(data))
@@ -100,7 +115,7 @@
   		}
   		
   		function findQueryParamValue(paramName) {
-  			let query = window.location.search;
+			let query = window.location.search;
   			if (!query || !paramName) {
   				return null;
   			}
