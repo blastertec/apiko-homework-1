@@ -98,12 +98,13 @@
   	 	}
   	 	
   	 	function appendCommentToPost(item, post) {
-  	 		const newComment = document.createElement('p');
+  	 		const newComment = document.createElement('div');
   	 		post.appendChild(newComment);
-  	 		newComment.innerHTML = `<div class='comments'>
+			newComment.setAttribute('class', 'comments');
+  	 		newComment.innerHTML = `
 				<img class='ava' src='ava.png' alt='ava'>
 				<h4>${item.name}, <a href='${item.email}'>${item.email}</a></h4>
-				<p>${item.body}</p></div>`;
+				<p>${item.body}</p>`;
   	 	}
 
   	 	function fetchComments(postId) {
