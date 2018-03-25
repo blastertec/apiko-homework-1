@@ -22,6 +22,19 @@
 		}
 		.comments {
 			padding-left: 50px;
+			font-size: 0.8em;
+			color: rgb(122, 122, 122);
+		}
+		.ava {
+			height: 50px;
+			width: 50px;
+			float: left;
+			opacity: 0.4;
+			margin: 10px 15px 0px 0px;
+		}
+		.posted-by {
+			color: rgb(122, 122, 122);
+			font-size: 0.8em;
 		}
 	</style>
 </head>
@@ -87,7 +100,10 @@
   	 	function appendCommentToPost(item, post) {
   	 		const newComment = document.createElement('p');
   	 		post.appendChild(newComment);
-  	 		newComment.innerHTML = `<div class='comments'><h4>${item.name}, ${item.email}</h4>${item.body}</div>`;
+  	 		newComment.innerHTML = `<div class='comments'>
+				<img class='ava' src='ava.png' alt='ava'>
+				<h4>${item.name}, <a href='${item.email}'>${item.email}</a></h4>
+				<p>${item.body}</p></div>`;
   	 	}
 
   	 	function fetchComments(postId) {
